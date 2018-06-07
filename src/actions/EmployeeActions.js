@@ -3,7 +3,8 @@ import firebase from 'firebase';
 import {
   EMPLOYEE_CREATE,
   EMPLOYEE_UPDATE,
-  EMPLOYEES_FETCH_SUCCES
+  EMPLOYEES_FETCH_SUCCES,
+  EMPLOYEE_SAVE_SUCCESS
 } from './types';
 
 export const employeeUpdate = ({ prop, value }) => {
@@ -32,5 +33,17 @@ export const employeesFetch = () => {
       .on('value', snapshot => {
         dispatch({ type: EMPLOYEES_FETCH_SUCCES, payload: snapshot.val() });
       });
+  }
+};
+
+export const employeeSave = ({ name, phone, shift, uid }) => {
+  const { currentUser } = firebase.auth();
+  return () => {
+      firebase.database().ref(`/users/${currentUser.uid}/employees/${uid}`)
+        .set({ name, phone, shift })
+        .then(() => {
+          dispatch({ type: EMPLOYEE_SAVE_SUCCESS });
+          Actions.pop();
+        });
   }
 };
