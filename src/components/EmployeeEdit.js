@@ -2,13 +2,14 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Communications from 'react-native-communications';
-import { employeeUpdate, employeeSave } from '../actions';
-import { Card, CardSection, Button } from './common';
+import { employeeUpdate, employeeSave, employeeDelete } from '../actions';
+import { Card, CardSection, Button, Confirm } from './common';
 import EmployeeForm from './EmployeeForm';
 
 class EmployeeEdit extends Component {
+  state = { showModal: false };
+
   componentWillMount() {
-    console.log(this.props.employee);
     _.each(this.props.employee, (value, prop) => {
       this.props.employeeUpdate({ prop, value });
     });
@@ -22,6 +23,14 @@ class EmployeeEdit extends Component {
   onTextPress() {
     const { phone, shift } = this.props;
     Communications.text(phone, `Your upcoming shift is on ${shift}`);
+  }
+
+  toggleModal() {
+    this.setState({ showModal: !this.state.showModal });
+  }
+
+  onAccept() {
+    this.props.employeeDelete({ uid: this.props.employee.uid });
   }
 
   render() {
@@ -40,6 +49,20 @@ class EmployeeEdit extends Component {
             Text Schedule
           </Button>
         </CardSection>
+
+        <CardSection>
+          <Button onPress={this.toggleModal.bind(this)}>
+            Fire Employee
+          </Button>
+        </CardSection>
+
+        <Confirm
+          visible={this.state.showModal}
+          onAccept={this.onAccept.bind(this)}
+          onDecline={this.toggleModal.bind(this)}
+        >
+          Are you sure to delete this?
+        </Confirm>
       </Card>
     );
   }
@@ -50,4 +73,4 @@ const mapStateToProps = state => {
   return { name, phone, shift };
 };
 
-export default connect(mapStateToProps, { employeeUpdate, employeeSave })(EmployeeEdit);
+export default connect(mapStateToProps, { employeeUpdate, employeeSave, employeeDelete })(EmployeeEdit);
